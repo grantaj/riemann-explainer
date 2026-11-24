@@ -26,7 +26,7 @@ Visit http://localhost:8000/ (ES modules require HTTP rather than file://).
 
 Run numerical tests with `node --test tests/math.test.mjs`. To run the browser smoke test, install Playwright (`npm install --no-save --package-lock=false playwright@1.56.1` and `npx playwright install chromium`), start the HTTP server, then run `node tests/browser.mjs`.
 
-The domain colouring uses Euler–Maclaurin summation with N=40 and eight corrections, over the displayed domains only. The pole is handled separately; the arithmetic uses double precision, not certified intervals. The explicit formula uses finite conjugate-pair sums and the exact prime-power staircase. At jumps the infinite explicit formula converges to the midpoint. The hypothetical off-line experiment compares single-pair envelopes, not a proof or a numerical model of all zeros.
+The domain colouring uses Euler–Maclaurin summation with N=max(40,ceil(0.55|Im(s)|)) and eight corrections, over the displayed domains only. The pole is handled separately; the arithmetic uses double precision, not certified intervals. The explicit formula uses finite conjugate-pair sums and the exact prime-power staircase. At jumps the infinite explicit formula converges to the midpoint. The hypothetical off-line experiment compares single-pair envelopes, not a proof or a numerical model of all zeros.
 
 ## GitHub Pages
 
