@@ -16,8 +16,9 @@ const arithmetic=read("proof-arithmetic.mjs"),arithmeticName=name("proof-arithme
 const proofPage=read("proof.html").replace("./proof.mjs","./"+proofName).replace("./style.css","./"+cssName).replace("./proof-arithmetic.mjs","./"+arithmeticName);
 if(!proofPage.includes(proofName)||!proofPage.includes(cssName))throw Error("Proof asset references not rewritten");
 const argument=read("argument.mjs"),argumentName=name("argument","mjs",argument);
-const argumentPage=read("argument.html").replace("./argument.mjs","./"+argumentName).replace("./style.css","./"+cssName);
-if(!argumentPage.includes(argumentName)||!argumentPage.includes(cssName))throw Error("Argument asset references not rewritten");
+const argumentLabs=read("argument-labs.mjs").replace("./argument.mjs","./"+argumentName),argumentLabsName=name("argument-labs","mjs",argumentLabs);
+const argumentPage=read("argument.html").replace("./argument.mjs","./"+argumentName).replace("./argument-labs.mjs","./"+argumentLabsName).replace("./style.css","./"+cssName);
+if(!argumentPage.includes(argumentName)||!argumentPage.includes(cssName)||!argumentPage.includes(argumentLabsName)||!argumentLabs.includes(argumentName))throw Error("Argument asset references not rewritten");
 rmSync(dir,{recursive:true,force:true});mkdirSync(dir,{recursive:true});
-for(const [file,content] of [["argument.html",argumentPage],[argumentName,argument],["index.html",index],["proof.html",proofPage],[proofName,proof],[arithmeticName,arithmetic],[mathName,math],[appName,app],[cssName,css],[".nojekyll",""]])writeFileSync(join(dir,file),content);
+for(const [file,content] of [["argument.html",argumentPage],[argumentName,argument],[argumentLabsName,argumentLabs],["index.html",index],["proof.html",proofPage],[proofName,proof],[arithmeticName,arithmetic],[mathName,math],[appName,app],[cssName,css],[".nojekyll",""]])writeFileSync(join(dir,file),content);
 console.log("Release:",appName,mathName,cssName);

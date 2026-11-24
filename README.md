@@ -41,3 +41,5 @@ The site links NIST DLMF §§25.2, 25.4, 25.10, 25.16, John Baez's explicit form
 
 
 - `argument.html`, `argument.mjs`: Phase 3, focused on the certified Alpöge–Claude proof. Original declaration links are pinned at 40e56bab026552e089d7afcfeff08d2defb9c005; named-declaration status is attributed to the Naskręcki atlas, not our own replay.
+
+Part III interactive labs (`argument-labs.mjs`) include a graphical dependency map, a pole/derivative threshold, actual character-filtered prime ramps and residue-table plots, and exact small mathematical models of matrix composition, local valuations, lattice indices, Gram overlap, integral gluing and Behrend sets. Models are explicitly distinguished from the deep arithmetic estimates they illustrate. The full browser suite exercises these controls on mobile and desktop.

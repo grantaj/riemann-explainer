@@ -124,7 +124,9 @@ try {
   assert.deepEqual(errors,[]);
   await page.locator('#continue a[href="./argument.html"]').click();
   await page.waitForSelector("html[data-argument-ready=true]");
-  assert.equal(await page.locator("#dependency-map a").count(),10);
+  await page.waitForSelector("html[data-labs-ready=true]");
+  assert.equal(await page.locator("#route-plot a").count(),10);
+  assert.equal(await page.locator("#dependency-map .route-text a").count(),10);
   assert.equal(await page.locator("#cell-body td").count(),8);
   assert.match(await page.locator("#cell-stat").textContent(),/84,701\.032/);
   const old=await page.locator("#cell-detail").textContent();
@@ -132,6 +134,14 @@ try {
   assert.notEqual(await page.locator("#cell-detail").textContent(),old);
   await page.locator("#cost-m").evaluate(el=>{el.value=".8";el.dispatchEvent(new Event("input",{bubbles:true}))});
   assert.match(await page.locator("#cost-stat").textContent(),/0\.80/);
+  for(const id of ["reflect-plot","pole-plane","pole-growth","filter-plot","filter-bars","cell-bars","cell-mean","chain-plot","chain-lattice","valuation-plot","valuation-total","lattice-plot","lattice-bounds","overlap-plot","glue-plot","behrend-plot","behrend-line"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
+  for(const [id,v,out] of [["reflect-beta",".7","reflect-detail"],["pole-order","90","pole-detail"],["filter-x","1200","filter-stat"],["valuation-a","2000","valuation-stat"],["lattice-a","4","lattice-stat"],["overlap-c",".9","overlap-stat"],["glue-a","5","glue-detail"]]){
+   const old=await page.locator("#"+out).textContent();await page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},v);assert.notEqual(await page.locator("#"+out).textContent(),old,id);
+  }
+  await page.locator("#reflect-exclude").check();assert.equal(await page.locator("#reflect-stat").textContent(),"Contradiction");
+  const oldChain=await page.locator("#chain-detail").textContent();await page.locator("#chain-0").click();assert.notEqual(await page.locator("#chain-detail").textContent(),oldChain);
+  await page.locator("#behrend-all").check();assert.match(await page.locator("#behrend-detail").textContent(),/Example progression/);
+  await page.locator("#behrend-all").uncheck();assert.match(await page.locator("#behrend-stat").textContent(),/0 progressions/);
   await page.locator("#window details.depth > summary").click();
   assert.ok(await page.locator("#window details.depth").evaluate(el=>el.open));
   await page.locator("#window details.source > summary").click();
