@@ -12,3 +12,5 @@ test("complex conjugation and first six zeros",()=>{const p=zeta([.25,12]),q=zet
 test("complex exponential",()=>{const v=pow(3,[-.5,-2]);near(Math.hypot(...v),1/Math.sqrt(3))});
 test("explicit formula pair term",()=>{const x=100,b=.5,t=14.1;near(contribution(x,b,t),-2*x**b*(b*Math.cos(t*Math.log(x))+t*Math.sin(t*Math.log(x)))/(b*b+t*t));near(explicit(x,0),x-Math.log(2*Math.PI)-.5*Math.log1p(-1/x**2));near(explicit(x,1)-explicit(x,0),contribution(x,.5,zeros[0]))});
 test("first 30 zero pairs improve RMS approximation on the test interval",()=>{let e0=0,e30=0;for(let x=2.5;x<100;x+=.25){const v=psiMid(d,x);e0+=(v-explicit(x,0))**2;e30+=(v-explicit(x,30))**2}assert.ok(e30<e0)});
+
+test("all 30 tabulated zeros in the zoom range",()=>{for(const t of zeros){const v=zeta([.5,t]);assert.ok(Math.hypot(...v)<1e-8,"zero at "+t);const w=zeta([.5,-t]);assert.ok(Math.hypot(...w)<1e-8,"conjugate at "+t)}});
