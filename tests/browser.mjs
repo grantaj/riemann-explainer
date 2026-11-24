@@ -1,6 +1,6 @@
 import {chromium} from "playwright";
 import assert from "node:assert/strict";
-const browser=await chromium.launch({headless:true});
+const browser=await chromium.launch({headless:true, ...(process.env.CHROME_PATH ? {executablePath:process.env.CHROME_PATH} : {})});
 try {
  for(const viewport of [{width:390,height:844},{width:1280,height:900}]){
   const page=await browser.newPage({viewport});
