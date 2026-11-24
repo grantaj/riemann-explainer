@@ -60,37 +60,58 @@ import {primeData,li,series,product,pow,zeta,zeros,explicit,contribution} from "
  });
 
  {
- const svg=$("domain"),ox=58,oy=22,pw=515,ph=335;let bounds,selection,marks=[],image=null;
+ const svg=$("domain"),ox=58,oy=22,pw=515,ph=335;let bounds,selection,marks=[],image=null,frame=0;
+ const allMarks=[...zeros.flatMap((t,i)=>[{s:.5,t,kind:"nontrivial",label:"zero-"+(i+1)},{s:.5,t:-t,kind:"nontrivial",label:"negative-zero-"+(i+1)}]),{s:-4,t:0,kind:"trivial",label:"trivial-4"},{s:-2,t:0,kind:"trivial",label:"trivial-2"},{s:1,t:0,kind:"pole",label:"pole"}];
+ const inView=p=>p.s>=bounds.a&&p.s<=bounds.b&&p.t>=bounds.c&&p.t<=bounds.e;
+ function niceTicks(lo,hi,target){const d=(hi-lo)/target,base=10**Math.floor(Math.log10(d)),step=([1,2,2.5,5,10].find(k=>k*base>=d)||10)*base;const ticks=[];for(let x=Math.ceil((lo-1e-9)/step)*step;x<=hi+1e-9;x+=step)ticks.push(Number(x.toFixed(9)));return ticks;}
  const X=s=>ox+(s-bounds.a)/(bounds.b-bounds.a)*pw,Y=t=>oy+(bounds.e-t)/(bounds.e-bounds.c)*ph;
  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
  function color(v){const m=Math.hypot(...v);if(!Number.isFinite(m))return [255,255,255];const hue=((Math.atan2(v[1],v[0])/(2*Math.PI)+1)%1)*6,brightness=Math.min(.94,.035+.39*Math.log1p(m)),chroma=brightness*.8,h=chroma*(1-Math.abs(hue%2-1)),k=brightness-chroma;return [[chroma,h,0],[h,chroma,0],[0,chroma,h],[0,h,chroma],[h,0,chroma],[chroma,0,h]][Math.min(5,Math.floor(hue))].map(v=>Math.round((v+k)*255))}
  function makeImage(){const c=document.createElement("canvas");c.width=260;c.height=180;const ctx=c.getContext("2d"),im=ctx.createImageData(c.width,c.height);for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){const s=bounds.a+(bounds.b-bounds.a)*(x+.5)/c.width,t=bounds.e-(bounds.e-bounds.c)*(y+.5)/c.height,v=color(zeta([s,t])),i=4*(y*c.width+x);im.data.set([...v,255],i)}ctx.putImageData(im,0,0);return c.toDataURL()}
  function nearest(s,t){return marks.reduce((best,p)=>!best||Math.hypot(X(p.s)-X(s),Y(p.t)-Y(t))<Math.hypot(X(best.s)-X(s),Y(best.t)-Y(t))?p:best,null)}
- function paint(){
-  const colored=$("domain-colors").checked,strip=$("domain-mode").value==="strip";let z=el("rect",{x:ox,y:oy,width:pw,height:ph,fill:"#0d1218",stroke:L});
+ function paint(withColor=true){
+  const colored=$("domain-colors").checked&&withColor;let z=el("rect",{x:ox,y:oy,width:pw,height:ph,fill:"#0d1218",stroke:L});
   if(colored){image??=makeImage();z+=el("image",{x:ox,y:oy,width:pw,height:ph,href:image,preserveAspectRatio:"none"})}
   else z+=el("rect",{x:X(0),y:oy,width:X(1)-X(0),height:ph,fill:A,"fill-opacity":.055});
-  const ticks=strip?[0,10,20,30,40]:[-4,-2,0,2,4];
+  const ticks=niceTicks(bounds.c,bounds.e,5);
   for(const t of ticks){z+=line(ox,Y(t),ox+pw,Y(t),L)+txt(ox-9,Y(t)+4,String(t),{"text-anchor":"end","font-size":13})}
-  const st=strip?[-.5,0,.5,1,1.5]:[-4,-3,-2,-1,0,.5,1,2,3];
+  const ordinary=niceTicks(bounds.a,bounds.b,6).filter(s=>![0,.5,1].some(k=>Math.abs(X(k)-X(s))<23));
+  const st=[...ordinary,...[0,.5,1].filter(s=>s>=bounds.a&&s<=bounds.b)].sort((a,b)=>a-b);
   for(const s of st){const critical=s===.5,edge=s===0||s===1;z+=line(X(s),oy,X(s),oy+ph,critical?A:edge?M:L,{"stroke-width":critical?2:1,"stroke-dasharray":critical?"":edge?"5 5":"","stroke-opacity":critical?1:edge?.8:.65})+txt(X(s),oy+ph+19,critical?"½":String(s),{"text-anchor":"middle","font-size":13,fill:critical?A:M})}
   z+=txt(ox,15,"Im(s)",{"font-size":13})+txt(ox+pw,393,"Re(s)",{"text-anchor":"end","font-size":13});
-  for(const p of marks){const x=X(p.s),y=Y(p.t),isZero=p.kind!=="pole";if(isZero){
-    z+=circle(x,y,8,"#0d1218",{stroke:"#0d1218","stroke-width":2})+circle(x,y,5.5,"#f5f8f7",{stroke:A,"stroke-width":1.5,"data-zero":p.label});
-    if(strip)z+=txt(x+13,y+4,p.t.toFixed(3),{fill:"#e9efed","font-size":12,"paint-order":"stroke",stroke:"#0d1218","stroke-width":3,"stroke-linejoin":"round"});
+  let lastLabelY=-Infinity;
+  const labelAll=marks.filter(p=>p.kind==="nontrivial").length<=10;
+  for(const p of [...marks].sort((a,b)=>b.t-a.t)){const x=X(p.s),y=Y(p.t),isZero=p.kind!=="pole";if(isZero){
+    const radius=labelAll?5.5:3.6;
+    z+=circle(x,y,radius+2,"#0d1218",{stroke:"#0d1218","stroke-width":1})+circle(x,y,radius,"#f5f8f7",{stroke:A,"stroke-width":1.2,"data-zero":p.label});
+    if(p.kind==="nontrivial"&&(labelAll||p.label===selection?.label)&&y-lastLabelY>=15){z+=txt(x+13,y+4,p.t.toFixed(3),{fill:"#e9efed","font-size":12,"paint-order":"stroke",stroke:"#0d1218","stroke-width":3,"stroke-linejoin":"round"});lastLabelY=y;}
    }else{z+=line(x-5,y-5,x+5,y+5,B,{"stroke-width":3,"data-pole":"true"})+line(x-5,y+5,x+5,y-5,B,{"stroke-width":3});}}
-  const {s,t}=selection;z+=el("circle",{cx:X(s),cy:Y(t),r:13,stroke:B,"stroke-width":1.7,fill:"none","pointer-events":"none"});
-  svg.innerHTML=z;svg.dataset.mode=strip?"strip":"real";svg.dataset.selection=selection.label||"point";
+  const {s,t}=selection;z+=el("circle",{cx:X(s),cy:Y(t),r:11,stroke:B,"stroke-width":1.7,fill:"none","pointer-events":"none"});
+  svg.innerHTML=z;svg.dataset.selection=selection.label||"point";svg.dataset.reMin=bounds.a;svg.dataset.reMax=bounds.b;svg.dataset.imMin=bounds.c;svg.dataset.imMax=bounds.e;
   const v=zeta([s,t]),input=dec(s,3)+(t<0?" − ":" + ")+dec(Math.abs(t),selection.kind==="nontrivial"?6:3)+"i";
   if(selection.kind==="pole")out("domain-detail","s = 1 · Simple pole (ζ is unbounded).");
   else if(selection.kind)out("domain-detail",(selection.kind==="nontrivial"?"Nontrivial zero":"Trivial zero")+" · s = "+input+" · ζ(s) = 0");
   else out("domain-detail","s = "+input+" · ζ(s) ≈ "+dec(v[0],4)+(v[1]>=0?" + ":" − ")+dec(Math.abs(v[1]),4)+"i · |ζ| ≈ "+dec(Math.hypot(...v),4));
  }
- function reset(){const strip=$("domain-mode").value==="strip";bounds=strip?{a:-.5,b:1.5,c:0,e:40}:{a:-4.35,b:3,c:-4,e:4};marks=strip?[...zeros.filter(t=>t<=40).map((t,i)=>({s:.5,t,kind:"nontrivial",label:"zero-"+(i+1)})),{s:1,t:0,kind:"pole",label:"pole"}]:[{s:-4,t:0,kind:"trivial",label:"trivial-4"},{s:-2,t:0,kind:"trivial",label:"trivial-2"},{s:1,t:0,kind:"pole",label:"pole"}];selection=marks[strip?0:1];image=null;paint()}
+ function scale(){
+  const re=val("domain-re-scale"),im=val("domain-im-scale"),negative=$("domain-negative").checked;
+  bounds={a:Number((.5-re).toFixed(2)),b:Number((.5+re).toFixed(2)),c:negative?-im:0,e:im};
+  marks=allMarks.filter(inView);image=null;
+  if(!selection||!inView(selection))selection=marks.find(p=>p.kind==="nontrivial"&&p.t>0)||marks.find(p=>p.kind==="trivial")||{s:.5,t:0};
+  out("domain-re-val",fmt(bounds.a)+" to "+fmt(bounds.b));out("domain-im-val",fmt(bounds.c)+" to "+fmt(bounds.e));
+  $("domain-re-scale").setAttribute("aria-valuetext",fmt(bounds.a)+" to "+fmt(bounds.b));
+  $("domain-im-scale").setAttribute("aria-valuetext",fmt(bounds.c)+" to "+fmt(bounds.e));
+  // Keep zoom responsive even when domain colouring is enabled.
+  if(frame)cancelAnimationFrame(frame);
+  paint(false);
+  if($("domain-colors").checked)frame=requestAnimationFrame(()=>{frame=0;paint()});
+ }
+ function reset(){$("domain-re-scale").value=1;$("domain-im-scale").value=40;$("domain-negative").checked=false;selection=allMarks[0];scale()}
  function inspect(s,t,snap=true){s=clamp(s,bounds.a,bounds.b);t=clamp(t,bounds.c,bounds.e);const p=nearest(s,t);selection=snap&&p&&Math.hypot(X(p.s)-X(s),Y(p.t)-Y(t))<19?p:{s,t};paint()}
- $("domain-mode").addEventListener("change",reset);$("domain-colors").addEventListener("change",paint);
+ for(const id of ["domain-re-scale","domain-im-scale"])$(id).addEventListener("input",scale);
+ $("domain-negative").addEventListener("change",scale);$("domain-reset").addEventListener("click",reset);$("domain-colors").addEventListener("change",()=>paint());
  svg.addEventListener("click",ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());if(p.x<ox||p.x>ox+pw||p.y<oy||p.y>oy+ph)return;inspect(bounds.a+(p.x-ox)/pw*(bounds.b-bounds.a),bounds.e-(p.y-oy)/ph*(bounds.e-bounds.c))});
- svg.addEventListener("keydown",ev=>{const ds=(bounds.b-bounds.a)/50,dt=(bounds.e-bounds.c)/50;let {s,t}=selection;if(ev.key==="ArrowLeft")s-=ds;else if(ev.key==="ArrowRight")s+=ds;else if(ev.key==="ArrowUp")t+=dt;else if(ev.key==="ArrowDown")t-=dt;else if(ev.key==="Enter"){selection=nearest(s,t);paint();ev.preventDefault();return}else return;ev.preventDefault();inspect(s,t,false)});
+ svg.addEventListener("keydown",ev=>{const ds=(bounds.b-bounds.a)/50,dt=(bounds.e-bounds.c)/50;let {s,t}=selection;if(ev.key==="ArrowLeft")s-=ds;else if(ev.key==="ArrowRight")s+=ds;else if(ev.key==="ArrowUp")t+=dt;else if(ev.key==="ArrowDown")t-=dt;else if(ev.key==="Enter"){selection=nearest(s,t)||selection;paint();ev.preventDefault();return}else return;ev.preventDefault();inspect(s,t,false)});
  reset();
 }
  {
