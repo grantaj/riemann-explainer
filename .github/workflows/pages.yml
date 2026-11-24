@@ -27,9 +27,10 @@ jobs:
           test -x "$chrome"
           "$chrome" --version
           echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+      - run: node build.mjs _site
       - name: Browser smoke tests
         run: |
-          python3 -m http.server 8000 > /tmp/riemann-server.log 2>&1 &
+          python3 -m http.server 8000 --directory _site > /tmp/riemann-server.log 2>&1 &
           server=$!
           trap 'kill "$server"' EXIT
           for i in {1..20}; do curl -fs http://127.0.0.1:8000/ >/dev/null && break; sleep 1; done
@@ -52,10 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - run: |
-          mkdir _site
-          cp index.html style.css app.mjs math.mjs _site/
-          touch _site/.nojekyll
+      - run: node build.mjs _site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
