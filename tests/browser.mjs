@@ -96,6 +96,32 @@ try {
 
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"horizontal overflow");
   assert.deepEqual(errors,[]);
+  // Navigate through the deployed link, not a source-only path.
+  await page.locator('#proofs a[href="./proof.html"]').click();
+  await page.waitForSelector("html[data-proof-ready=true]");
+  for(const id of ["ramp-plot","window-plot","spot-plot","char-plot","balance-plot","mult-plot"])
+   assert.ok(await page.locator("#"+id+" > *").count()>0,id+" did not render");
+  for(const [id,v,out] of [["ramp-x","75","ramp-stat"],["ramp-mode","center","ramp-stat"],["window-beta",".85","window-stat"],["char-k","4","char-stat"],["balance-a",".75","balance-stat"],["mult-m","7","mult-stat"]]){
+   const before=await page.locator("#"+out).textContent();
+   await page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},v);
+   assert.notEqual(await page.locator("#"+out).textContent(),before,id+" did not update");
+  }
+  await page.locator("#windows details.depth > summary").click();
+  assert.ok(await page.locator("#spot-plot").isVisible());
+  const before=await page.locator("#spot-plot path").getAttribute("d");
+  await page.locator("#spot-order").evaluate(el=>{el.value=100;el.dispatchEvent(new Event("input",{bubbles:true}))});
+  assert.notEqual(await page.locator("#spot-plot path").getAttribute("d"),before);
+  await page.locator("#windows details.derivation > summary").click();
+  assert.ok(await page.locator("#windows details.derivation").evaluate(el=>el.open));
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Part II horizontal overflow");
+  assert.deepEqual(errors,[]);
+  await page.goto("http://127.0.0.1:8000/proof.html");
+  await page.waitForSelector("html[data-arithmetic-ready=true]");
+  for(const id of ["bin-chart","field-chart","theta-chart","gain-chart","trace-chart"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
+  for(const [id,v,out] of [["bin-n","70","bin-stat"],["theta-n","8","theta-stat"],["gain-x","70","gain-detail"],["trace-b","3","trace-detail"]]){const before=await page.locator("#"+out).textContent();await page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},v);assert.notEqual(await page.locator("#"+out).textContent(),before,id);}
+  await page.locator("#field-prime").selectOption("7");assert.equal(await page.locator("#field-stat").textContent(),"Inert");
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Phase II arithmetic horizontal overflow");
+  assert.deepEqual(errors,[]);
   await page.close();
  }
  console.log("Desktop and mobile interaction smoke tests passed");
