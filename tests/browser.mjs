@@ -117,10 +117,26 @@ try {
   assert.deepEqual(errors,[]);
   await page.goto("http://127.0.0.1:8000/proof.html");
   await page.waitForSelector("html[data-arithmetic-ready=true]");
-  for(const id of ["bin-chart","field-chart","theta-chart","gain-chart","trace-chart"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
-  for(const [id,v,out] of [["bin-n","70","bin-stat"],["theta-n","8","theta-stat"],["gain-x","70","gain-detail"],["trace-b","3","trace-detail"]]){const before=await page.locator("#"+out).textContent();await page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},v);assert.notEqual(await page.locator("#"+out).textContent(),before,id);}
+  for(const id of ["bin-chart","field-chart","theta-chart","gain-chart"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
+  for(const [id,v,out] of [["bin-n","70","bin-stat"],["theta-n","8","theta-stat"],["gain-x","70","gain-detail"]]){const before=await page.locator("#"+out).textContent();await page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},v);assert.notEqual(await page.locator("#"+out).textContent(),before,id);}
   await page.locator("#field-prime").selectOption("7");assert.equal(await page.locator("#field-stat").textContent(),"Inert");
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Phase II arithmetic horizontal overflow");
+  assert.deepEqual(errors,[]);
+  await page.locator('#continue a[href="./argument.html"]').click();
+  await page.waitForSelector("html[data-argument-ready=true]");
+  assert.equal(await page.locator("#dependency-map a").count(),10);
+  assert.equal(await page.locator("#cell-body td").count(),8);
+  assert.match(await page.locator("#cell-stat").textContent(),/84,701\.032/);
+  const old=await page.locator("#cell-detail").textContent();
+  await page.locator("#cell-u").selectOption("7");
+  assert.notEqual(await page.locator("#cell-detail").textContent(),old);
+  await page.locator("#cost-m").evaluate(el=>{el.value=".8";el.dispatchEvent(new Event("input",{bubbles:true}))});
+  assert.match(await page.locator("#cost-stat").textContent(),/0\.80/);
+  await page.locator("#window details.depth > summary").click();
+  assert.ok(await page.locator("#window details.depth").evaluate(el=>el.open));
+  await page.locator("#window details.source > summary").click();
+  assert.ok(await page.locator("#window details.source a").first().isVisible());
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Part III overflow");
   assert.deepEqual(errors,[]);
   await page.close();
  }
