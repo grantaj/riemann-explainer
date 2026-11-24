@@ -1,0 +1,14 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {reflections,poleRatio,characterRamps,chainMatrices,det,valuations,latticeBounds,gramStats,glue,sphereSet,translatedTotals,fitsWindow} from "../argument-labs.mjs";
+const near=(a,b,t=1e-9)=>assert.ok(Math.abs(a-b)<t,a+" != "+b);
+test("reflection and pole threshold",()=>{assert.equal(reflections(.2,1).length,4);assert.equal(reflections(.5,1).length,2);near(poleRatio(.6,80),0);assert.ok(poleRatio(.8,80)>poleRatio(.8,20));assert.ok(poleRatio(.55,80)<0)});
+test("character expansion equals the direct filter including exceptional terms",()=>{for(let x of [100,700,1319,2000]){let f=characterRamps(x);near(f.combined,f.terms.reduce((a,b)=>a+b,0),1e-8);for(let p of f.points)assert.equal(p.z,(1+p.u)*(1-p.v))}});
+test("all 16 matrix chains have the same index",()=>{for(let w=0;w<16;w++){let list=chainMatrices([0,1,2,3].map(i=>(w>>i)&1));for(let i=0;i<=4;i++)assert.equal(det(list[i]),2**i)}});
+test("Legendre factorial valuation and odd series",()=>{for(let p of [3,7,11,19])for(let a of [10,100,1000,10000]){let v=valuations(p,a),direct=0;for(let i=1;i<=a;i++)for(let n=i;n%p===0;n/=p)direct++;assert.equal(v.fact,direct);assert.equal(v.remain,v.fact-Math.floor((a-1)/(p*p-1)));near(v.odd,a/(p-1)-a/(p*p-1))}});
+test("area and operator norm bounds",()=>{for(let a=1;a<=5;a++)for(let b=0;b<=5;b++)for(let d=1;d<=5;d++){let v=latticeBounds(a,b,d);assert.equal(v.index,a*d);assert.ok(v.index<=v.hadamard+1e-9&&v.index<=v.op2+1e-9)}});
+test("Gram trace and effective rank",()=>{for(let c of [0,.1,.55,1]){let v=gramStats(c);near(v.spectrum.reduce((a,b)=>a+b,0),6);near(v.effective,36/v.spectrum.reduce((a,b)=>a+b*b,0));assert.ok(v.effective<=v.rank+1e-9)}});
+test("local minima of lattice gluing",()=>{for(let a=1;a<=5;a++)for(let b=0;b<=3;b++){let v=glue(a,b);assert.equal(v.common,6**Math.min(a,b));assert.equal(v.first%v.common,0);assert.equal(v.second%v.common,0)}});
+test("Behrend sphere avoids three-term progressions",()=>{for(let r=0;r<=48;r++)assert.equal(sphereSet(r).count,0);assert.ok(sphereSet(17).points.length>0);assert.ok(sphereSet(17,true).count>0)});
+test("published translation mean",()=>near(translatedTotals().reduce((a,b)=>a+b,0)/4,84460.83971584712,1e-7));
+
+test("whole window containment",()=>{assert.ok(fitsWindow(1));assert.ok(fitsWindow(4/3));assert.ok(!fitsWindow(.99));assert.ok(!fitsWindow(1.34))});

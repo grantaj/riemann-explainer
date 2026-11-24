@@ -114,30 +114,7 @@ import {primeData,li,series,product,pow,zeta,zeros,explicit,contribution} from "
  svg.addEventListener("keydown",ev=>{const ds=(bounds.b-bounds.a)/50,dt=(bounds.e-bounds.c)/50;let {s,t}=selection;if(ev.key==="ArrowLeft")s-=ds;else if(ev.key==="ArrowRight")s+=ds;else if(ev.key==="ArrowUp")t+=dt;else if(ev.key==="ArrowDown")t-=dt;else if(ev.key==="Enter"){selection=nearest(s,t)||selection;paint();ev.preventDefault();return}else return;ev.preventDefault();inspect(s,t,false)});
  reset();
 }
- {
- const entries={
- factor:["Prime factorisation","Every integer greater than 1 has a unique decomposition into prime factors (ignoring their order). For example, 60 = 2² × 3 × 5. This is the fundamental theorem of arithmetic and the reason Euler’s product contains each positive integer exactly once."],
- pnt:["Prime number theorem","As x tends to infinity, π(x)/(x/log x) tends to 1. So the fraction of integers up to x that are prime is approximately 1/log x. This describes average density over large ranges, not the next gap or a probabilistic law."],
- asymptotic:["Asymptotic equivalence","f(x) ∼ g(x) means f(x)/g(x) → 1 as x → ∞. For example, x+√x ∼ x even though their difference grows without bound. It tells us relative accuracy, not the absolute error."],
- li:["Logarithmic integral","li(x) = PV ∫₀ˣ dt/log t. For x > 1, li(x) = li(2) + ∫₂ˣ dt/log t. The integrand is the estimated prime density. PV means the singularity at 1 is crossed using a Cauchy principal value; the integral starting at 2 avoids that issue. li(100) ≈ 30.126."],
- zeta:["Riemann zeta function","ζ(s) = 1 + 2⁻ˢ + 3⁻ˢ + ⋯ for Re(s) > 1. The series is absolutely convergent there. Its unique analytic continuation is defined everywhere else except a simple pole at s = 1."],
- geometric:["Geometric series","For |r| < 1, 1 + r + r² + ⋯ = 1/(1−r). In the Euler product take r = p⁻ˢ. The terms are precisely the powers of the prime p."],
- euler:["Euler product","ζ(s) = ∏ over primes p of (1−p⁻ˢ)⁻¹, for Re(s) > 1. Expanding finite products gives terms for all integers built from those primes. The full product converges absolutely in that region, equals the series, and cannot vanish there."],
- complex:["Complex numbers","A complex number a+ib has real coordinate a and imaginary coordinate b, with i² = −1. It can be drawn as a vector from the origin. Addition is vector addition; multiplication multiplies lengths and adds angles."],
- exp:["Euler’s formula","exp(iθ) = cos θ + i sin θ. This is a unit vector at angle θ in radians. Thus n⁻ˢ = n⁻σ exp(−it log n): σ controls its length and t controls its angle."],
- zero:["Zeros of a function","A zero is an input s at which the output ζ(s) equals 0 (both its real and imaginary components vanish). The known nontrivial zeros have the form ½ ± it, with the first positive t ≈ 14.134725."],
- continuation:["Analytic continuation","A complex analytic function is locally described by a convergent power series. If another analytic function agrees with it on an open overlap, they must agree throughout their connected common domain. This lets us extend ζ beyond Re(s) > 1 uniquely, without pretending the original infinite series converges there."],
- pole:["Simple pole","A pole is an isolated point where a function becomes unbounded. At s = 1, ζ(s) behaves like 1/(s−1) plus a function analytic nearby. The coefficient of 1/(s−1) is 1."],
- strip:["Critical strip","Every nontrivial zero lies in 0 < Re(s) < 1. The Euler product excludes zeros to the right of 1; the functional equation relates the left to the right, and the nonvanishing on Re(s) = 1 is a deeper theorem. The critical line is Re(s) = ½."],
- functional:["Functional equation","The completed zeta function ξ(s) = ½s(s−1)π⁻ˢᐟ² Γ(s/2)ζ(s) is entire and obeys ξ(s) = ξ(1−s). Here Γ extends the factorial: Γ(n) = (n−1)! for positive integers. Its zeros are the nontrivial zeta zeros. Together with conjugation this gives symmetry across the real axis and critical line."],
- psi:["Chebyshev function","ψ(x) = sum of log p over all prime powers pᵏ ≤ x. Equivalently, ψ(x) = Σₙ≤ₓ Λ(n), where the von Mangoldt function Λ(n) equals log p if n is a power of a prime p and 0 otherwise. The logarithmic derivative −ζ′(s)/ζ(s) = Σ Λ(n)n⁻ˢ for Re(s) > 1."],
- explicit:["The explicit formula","Apply a complex inversion integral to −ζ′(s)/ζ(s) to recover ψ. Moving the integration contour encounters poles at the zeros of ζ and at s = 1. Their residues produce the terms −x^ρ/ρ and x; the trivial zeros and the origin supply the logarithmic corrections. This is why the zeros control the distribution of prime powers. The infinite sum is interpreted symmetrically, with midpoint values at jumps."],
- bigO:["Big-O notation","f(x) = O(g(x)) means that for some constants C and x₀, |f(x)| ≤ C|g(x)| whenever x ≥ x₀. Thus the RH prime-counting bound is an upper bound on the magnitude of the error for all sufficiently large x, not an equality or a numerical approximation."]
- };
- const dialog=$("concept-dialog"),close=$("concept-close");let trigger=null;
- for(const link of document.querySelectorAll("a[data-concept]"))link.addEventListener("click",ev=>{if(ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.altKey||typeof dialog.showModal!=="function")return;const entry=entries[link.dataset.concept];if(!entry)return;ev.preventDefault();trigger=link;out("concept-title",entry[0]);$("concept-body").textContent=entry[1];$("concept-source").href=link.href;dialog.showModal();close.focus()});
- close.addEventListener("click",()=>dialog.close());dialog.addEventListener("click",e=>{if(e.target===dialog)dialog.close()});dialog.addEventListener("close",()=>trigger?.focus());
-}
+
  bind(["music-n","music-x","music-error"],()=>{const n=val("music-n"),max=Math.round(10**val("music-x")),error=$("music-error").checked,trend=x=>error?x:0;out("music-n-val",n+" / 30");out("music-x-val",fmt(max));out("music-stat",2*n+" zeros");
  const exact=stepData(d.psi,2,max,trend,!error),approx=sample(2,max,900,x=>explicit(x,n)-trend(x));plot("music-plot",[{data:exact,color:A},{data:approx,color:B}],{xmin:2,xmax:max,ylabel:error?"ψ(x) − x":"ψ(x)",xtick:x=>fmt(Math.round(x))});});
  bind(["rh-beta"],()=>{const b=val("rh-beta"),t=14.134725141734695;out("rh-beta-val",dec(b,2));out("rh-stat",b===.5?"On the critical line":"Off the critical line");const X=s=>90+s*420,Y=t=>82-t*4.5;
