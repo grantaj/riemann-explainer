@@ -26,6 +26,7 @@ export function sphereSet(radius,all=false){
  for(let i=0;i<sorted.length;i++)for(let j=i+1;j<sorted.length;j++){let a=sorted[i],b=sorted[j],c=2*b-a;if(set.has(c)){count++;example??=[a,b,c]}}
  return {points,sorted,count,example};
 }
+export const fitsWindow=a=>a>=1&&1.5*a<=2+1e-12;
 export function translatedTotals(){return [1,3,5,7].map(u=>residueTable(u).reduce((a,b)=>a+b,0))}
 if(typeof document!=="undefined"){
  const $=id=>document.getElementById(id),num=id=>Number($(id).value),put=(id,s)=>$(id).textContent=s;
@@ -42,11 +43,23 @@ if(typeof document!=="undefined"){
  function horizontal(values,names,colors,height=160){const max=Math.max(1,...values.map(Math.abs)),row=(height-15)/values.length,X=v=>315+210*v/max;let s=line(X(0),3,X(0),height-10,M);values.forEach((v,i)=>{let y=i*row+8;s+=txt(5,y+17,names[i],M,"start",13)+rect(Math.min(X(0),X(v)),y,Math.abs(X(v)-X(0)),20,colors[i])+txt(595,y+16,fmt(v),W,"end",13)});return s}
  // The visual dependency graph is itself the chapter navigation.
  function route(){
- const nodes=[["conclusion",210,5,180,38,"RH / symmetry"],["window",210,61,180,38,"One-sided windows"],["comparison",210,117,180,38,"Prime comparison"],["main-inequality",210,173,180,38,"Main inequality (M)"],["theta-chain",3,234,114,33,"Theta chain"],["local-gain",123,234,114,33,"Divisibility"],["size",243,234,114,33,"Size"],["rank",363,234,114,33,"Rank"],["denominators",483,234,114,33,"Denominators"],["hosts",210,280,180,27,"Arithmetic supply"]];
- let s="";for(let i=0;i<3;i++)s+=line(300,nodes[i][2]+38,300,nodes[i+1][2],M,"",2);s+=line(300,211,300,222,M)+line(60,222,540,222,M);for(let x of [60,180,300,420,540])s+=line(x,222,x,234,M)+line(x,267,x,273,L);s+=line(60,273,540,273,L)+line(300,273,300,280,L);
- for(const [id,x,y,w,h,label] of nodes)s+='<a href="#'+id+'" data-proof-node="'+id+'" aria-label="'+label+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6" fill="'+BG+'" stroke="'+(id==="main-inequality"?B:A)+'"/>'+txt(x+w/2,y+h/2+5,label,W,"middle",id==="denominators"?12:14)+'</a>';
+ const mobile=typeof matchMedia!=="undefined"&&matchMedia("(max-width: 600px)").matches;
+ let nodes,s="";
+ if(mobile){
+  $("route-plot").setAttribute("viewBox","0 0 360 465");
+  nodes=[["conclusion",70,4,220,37,"RH / symmetry"],["window",70,53,220,37,"One-sided windows"],["comparison",70,102,220,37,"Prime comparison"],["main-inequality",70,151,220,37,"Main inequality (M)"],["theta-chain",5,216,166,35,"Theta chain"],["local-gain",189,216,166,35,"Divisibility"],["size",5,266,166,35,"Size"],["rank",189,266,166,35,"Rank"],["denominators",97,316,166,35,"Denominators"],["hosts",70,407,220,37,"Arithmetic supply"]];
+  for(let i=0;i<3;i++)s+=line(180,nodes[i][2]+37,180,nodes[i+1][2],M,"",2);
+  s+=line(180,188,180,204,M)+line(88,204,272,204,M)+line(88,204,88,216,M)+line(272,204,272,216,M);
+  s+=line(180,204,180,316,M)+line(171,283,189,283,M)+line(180,351,180,407,L);
+  s+=line(5,233,1,233,L)+line(1,233,1,378,L)+line(355,233,359,233,L)+line(359,233,359,378,L)+line(5,283,1,283,L)+line(355,283,359,283,L)+line(1,378,359,378,L);
+ }else{
+  $("route-plot").setAttribute("viewBox","0 0 600 310");
+  nodes=[["conclusion",210,5,180,38,"RH / symmetry"],["window",210,61,180,38,"One-sided windows"],["comparison",210,117,180,38,"Prime comparison"],["main-inequality",210,173,180,38,"Main inequality (M)"],["theta-chain",3,234,114,33,"Theta chain"],["local-gain",123,234,114,33,"Divisibility"],["size",243,234,114,33,"Size"],["rank",363,234,114,33,"Rank"],["denominators",483,234,114,33,"Denominators"],["hosts",210,280,180,27,"Arithmetic supply"]];
+  for(let i=0;i<3;i++)s+=line(300,nodes[i][2]+38,300,nodes[i+1][2],M,"",2);s+=line(300,211,300,222,M)+line(60,222,540,222,M);for(let x of [60,180,300,420,540])s+=line(x,222,x,234,M)+line(x,267,x,273,L);s+=line(60,273,540,273,L)+line(300,273,300,280,L);
+ }
+ for(const [id,x,y,w,h,label] of nodes)s+='<a href="#'+id+'" data-proof-node="'+id+'" aria-label="'+label+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6" fill="'+BG+'" stroke="'+(id==="main-inequality"?B:A)+'"/>'+txt(x+w/2,y+h/2+5,label,W,"middle",mobile?14:id==="denominators"?12:14)+'</a>';
  draw("route-plot",s);
- }route();
+ }route();if(typeof matchMedia!=="undefined")matchMedia("(max-width: 600px)").addEventListener("change",route);
  on(["reflect-beta","reflect-exclude"],()=>{
  const b=num("reflect-beta"),excluded=$("reflect-exclude").checked,pts=reflections(b,.65),X=v=>70+460*v,Y=v=>112-105*v;
  let s=rect(X(0),15,460,194,BG)+rect(X(.5),15,230,194,excluded?B:A,excluded?.15:.05)+line(X(0),15,X(0),209,L)+line(X(1),15,X(1),209,L)+line(X(.5),15,X(.5),209,A,"5 5",2)+line(70,Y(0),530,Y(0),L);
@@ -62,7 +75,7 @@ if(typeof document!=="undefined"){
  // Recenter diagram so both sides of the circle are visible.
  draw("pole-plane",d);
  const ratios=Array.from({length:121},(_,i)=>poleRatio(b,i)),min=Math.min(0,...ratios)-.15,max=Math.max(0,...ratios)+.15,x=k=>48+530*k/120,y=v=>147-120*(v-min)/(max-min);
- let g=line(48,y(0),578,y(0),A)+line(48,15,48,147,L)+path(ratios.map((v,i)=>[x(i),y(v)]),B)+line(x(j),15,x(j),147,M,"4 4")+circle(x(j),y(ratios[j]),5,B);for(let k of [0,30,60,90,120])g+=txt(x(k),172,String(k));g+=txt(48,13,fix(max,1),M,"start",12)+txt(48,145,fix(min,1),M,"start",12)+txt(578,172,"j",M,"end",13);
+ let g=line(48,y(0),578,y(0),A)+line(48,15,48,147,L)+path(ratios.map((v,i)=>[x(i),y(v)]),B)+line(x(j),15,x(j),147,M,"4 4")+circle(x(j),y(ratios[j]),5,B);for(let k of [0,30,60,90,120])g+=txt(x(k),172,String(k));g+=txt(48,13,fix(max,1),M,"start",12)+txt(48,145,fix(min,1),M,"start",12)+txt(578,172,"j",M,"end",13)+txt(300,13,"log₁₀(coefficient / bound)",M,"middle",12);
  draw("pole-growth",g);put("pole-beta-val",fix(b));put("pole-order-val",j);put("pole-stat",b>t?"Pole inside allowed radius":b===t?"At threshold":"No contradiction from this bound");put("pole-detail","Single-pole coefficient / allowed scale = 10^"+fix(poleRatio(b,j))+". "+(b>t?"Increasing the derivative order eventually defeats any fixed multiplicative constant.":"This candidate does not violate the selected exponent θ."));
  });
  on(["filter-x","filter-view"],()=>{
@@ -117,6 +130,12 @@ if(typeof document!=="undefined"){
  s+=txt(300,167,"Each layer: x and y digits 0–4",M);draw("behrend-plot",s);
  const X=n=>30+540*n/444;s=line(30,58,570,58,L);for(let k=0;k<=4;k++)s+=txt(X(k*111),88,String(k*111),M,"middle",12);for(const n of v.sorted)s+=line(X(n),example.has(n)?15:34,X(n),58,example.has(n)?B:A,"",example.has(n)?3:1.5);draw("behrend-line",s);
  put("behrend-stat",v.points.length+" classes · "+v.count+" progressions");put("behrend-detail",v.count?"Example progression: "+v.example.join(", ")+". The full cube contains "+v.count+" distinct three-term progressions.":"The "+v.points.length+" encoded points lie on one sphere; exhaustive counting finds no nontrivial three-term progression.");
+ });
+ on(["host-window-a"],()=>{
+ const a=num("host-window-a"),ok=fitsWindow(a),X=v=>52+(v-.7)*305;
+ let s=txt(10,22,"Arithmetic",W,"start")+rect(X(1),30,X(2)-X(1),23,A,.7)+txt(X(1),69,"Y",A)+txt(X(2),69,"Y²",A)+txt(10,95,"Analytic",W,"start")+rect(X(a),104,X(1.5*a)-X(a),23,ok?C:B,.85)+txt(X(a),145,"Z",M)+txt(X(1.5*a),145,"Z^(3/2)",M);
+ for(let v of [1,2])s+=line(X(v),26,X(v),130,M,"4 4");
+ draw("host-window-plot",s);put("host-window-a-val",fix(a));put("host-window-stat",ok?"Entire window fits":"Not fully covered");put("host-window-detail","Analytic interval in log_Y coordinates: ["+fix(a)+", "+fix(1.5*a)+"]. "+(ok?"Every point is inside [1, 2].":"Part of this interval falls outside [1, 2]; an isolated overlap is not sufficient."));
  });
  document.documentElement.dataset.labsReady="true";
 }

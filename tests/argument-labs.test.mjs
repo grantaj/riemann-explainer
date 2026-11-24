@@ -1,5 +1,5 @@
 import test from "node:test";import assert from "node:assert/strict";
-import {reflections,poleRatio,characterRamps,chainMatrices,det,valuations,latticeBounds,gramStats,glue,sphereSet,translatedTotals} from "../argument-labs.mjs";
+import {reflections,poleRatio,characterRamps,chainMatrices,det,valuations,latticeBounds,gramStats,glue,sphereSet,translatedTotals,fitsWindow} from "../argument-labs.mjs";
 const near=(a,b,t=1e-9)=>assert.ok(Math.abs(a-b)<t,a+" != "+b);
 test("reflection and pole threshold",()=>{assert.equal(reflections(.2,1).length,4);assert.equal(reflections(.5,1).length,2);near(poleRatio(.6,80),0);assert.ok(poleRatio(.8,80)>poleRatio(.8,20));assert.ok(poleRatio(.55,80)<0)});
 test("character expansion equals the direct filter including exceptional terms",()=>{for(let x of [100,700,1319,2000]){let f=characterRamps(x);near(f.combined,f.terms.reduce((a,b)=>a+b,0),1e-8);for(let p of f.points)assert.equal(p.z,(1+p.u)*(1-p.v))}});
@@ -10,3 +10,5 @@ test("Gram trace and effective rank",()=>{for(let c of [0,.1,.55,1]){let v=gramS
 test("local minima of lattice gluing",()=>{for(let a=1;a<=5;a++)for(let b=0;b<=3;b++){let v=glue(a,b);assert.equal(v.common,6**Math.min(a,b));assert.equal(v.first%v.common,0);assert.equal(v.second%v.common,0)}});
 test("Behrend sphere avoids three-term progressions",()=>{for(let r=0;r<=48;r++)assert.equal(sphereSet(r).count,0);assert.ok(sphereSet(17).points.length>0);assert.ok(sphereSet(17,true).count>0)});
 test("published translation mean",()=>near(translatedTotals().reduce((a,b)=>a+b,0)/4,84460.83971584712,1e-7));
+
+test("whole window containment",()=>{assert.ok(fitsWindow(1));assert.ok(fitsWindow(4/3));assert.ok(!fitsWindow(.99));assert.ok(!fitsWindow(1.34))});
