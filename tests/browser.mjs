@@ -51,6 +51,9 @@ try {
   assert.equal(await page.locator("#domain [data-zero]").count(),2);
   assert.equal(await page.locator("#domain [data-pole]").count(),1);
   assert.match(await page.locator("#domain").getAttribute("data-selection"),/^trivial-/);
+  // Choose a particular zero before testing keyboard navigation and snapping.
+  await page.locator('#domain [data-zero="trivial-2"]').click();
+  assert.equal(await page.locator("#domain").getAttribute("data-selection"),"trivial-2");
   await page.locator("#domain").focus();
   await page.keyboard.press("ArrowRight");
   assert.equal(await page.locator("#domain").getAttribute("data-selection"),"point");
