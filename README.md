@@ -18,7 +18,8 @@ Visit http://localhost:8000/ (ES modules require HTTP rather than file://).
 
 ## Files
 
-- `index.html`: six chapters, accessible controls, links to sources
+- `index.html`: six foundation chapters, accessible controls, links to sources
+- `proof.html`, `proof.mjs`: Phase 2 bridge, six experiments, dated verification record and source-linked map
 - `style.css`: responsive dark visual system
 - `math.mjs`: pure numerical kernels and first 30 positive zero ordinates (standard values, see [LMFDB](https://www.lmfdb.org/zeros/zeta/))
 - `app.mjs`: SVG plots and canvas domain colouring
@@ -36,5 +37,5 @@ The repository is public. CI uses the Chrome already installed on the GitHub-hos
 
 ## Sources
 
-The site links NIST DLMF §§25.2, 25.4, 25.10, 25.16, John Baez's explicit formula exposition, and LMFDB. Proof announcements and their verification status will be treated in Phase 2, with dated primary-source references.
+The site links NIST DLMF §§25.2, 25.4, 25.10, 25.16, John Baez's explicit formula exposition, and LMFDB. Phase 2 links the original Alpöge announcement, the 21 November Lean community certification, independent verification logs and mathematical reading projects. It distinguishes the verified formal result from gaps in our exposition and from the separate Masullo draft. The arithmetic machinery and the localized Landau proof remain subjects for Phase 3.
 
