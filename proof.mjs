@@ -1,7 +1,11 @@
 export const gamma=0.5772156649015329;
 export function primePowerWeights(n){
  const a=Array(n+1).fill(0);
- for(let p=2;p<=n;p++)if(!a[p])for(let k=p;k<=n;k*=p)a[k]=Math.log(p);
+ const composite=new Uint8Array(n+1);
+ for(let p=2;p<=n;p++)if(!composite[p]){
+  for(let j=p*p;j<=n;j+=p)composite[j]=1;
+  for(let k=p;k<=n;k*=p)a[k]=Math.log(p);
+ }
  return a;
 }
 export function primeSum(x,weights,mode="ramps"){
