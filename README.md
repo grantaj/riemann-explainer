@@ -32,7 +32,7 @@ The domain colouring uses Euler–Maclaurin summation with N=40 and eight correc
 
 In repository Settings → Pages, choose **GitHub Actions** as the source. The Test and publish workflow runs mathematical and browser checks on PRs and deploys only after the checks pass on main. Expected project URL: https://grantaj.github.io/riemann-explainer/
 
-This is currently a private repository. GitHub Pages availability for private repositories depends on account plan; public site publication requires appropriate repository and Pages settings. Do not change repository visibility without the owner's decision.
+The repository is public. CI uses the Chrome already installed on the GitHub-hosted runner, avoiding browser downloads and system dependency installation. Locally, set `CHROME_PATH` to an installed Chrome/Chromium executable to skip the Playwright browser download. Superseded runs are cancelled automatically.
 
 ## Sources
 
