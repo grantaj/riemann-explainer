@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --test tests/*.test.mjs
-      - run: node --check app.mjs
+      - run: node --check app.mjs && node --check proof.mjs && node --check proof-arithmetic.mjs && node --check argument.mjs
       - run: npm install --no-save --package-lock=false --no-audit --no-fund playwright@1.56.1
       - name: Locate preinstalled Chrome
         run: |

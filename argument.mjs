@@ -1,0 +1,16 @@
+export const exponents=(a,b,c)=>[1-a,1+a-b,a,b-2*c];
+export function chi(p,r){let v=((r%p)+p)%p;if(!v)return 0;let a=v,e=(p-1)/2,z=1;while(e>0){if(e%2)z=z*a%p;a=a*a%p;e=Math.floor(e/2)}return z===1?1:-1}
+export function residueTable(u=1){
+ const N=200000,sieve=new Uint8Array(N+1);sieve.fill(1,2);
+ for(let p=2;p*p<=N;p++)if(sieve[p])for(let j=p*p;j<=N;j+=p)sieve[j]=0;
+ const cells=Array(8).fill(0),cols=[1,3,5,7];
+ for(let p=3;p<=N;p+=2)if(p!==11&&sieve[p])for(let r=p;r<=N;r*=p){const c=r%16,i=cols.indexOf(Math.min(c,16-c)),row=(1+chi(11,r))/2,j=row*4+i,w=row===1&&cols[i]===u?10:.05;cells[j]+=(1-chi(1319,r))*Math.log(p)*Math.max(10000/r-w,0)}
+ return cells;
+}
+if(typeof document!=="undefined"){
+ const $=id=>document.getElementById(id),fmt=v=>v.toLocaleString("en-AU",{minimumFractionDigits:3,maximumFractionDigits:3});
+ const tables=new Map();
+ function table(){let u=Number($("cell-u").value);if(!tables.has(u))tables.set(u,residueTable(u));let v=tables.get(u);$("cell-body").replaceChildren();for(let r=0;r<2;r++){let tr=document.createElement("tr"),th=document.createElement("th");th.textContent=r?"+1":"−1";tr.append(th);for(let c=0;c<4;c++){let td=document.createElement("td");td.textContent=fmt(v[4*r+c]);if(r===1&&[1,3,5,7][c]===u){td.style.color="var(--a)";td.style.fontWeight="bold";td.setAttribute("aria-label","Distinguished cell: "+fmt(v[4*r+c]))}tr.append(td)}$("cell-body").append(tr)}let total=v.reduce((a,b)=>a+b,0);$("cell-stat").textContent="P = "+fmt(total);$("cell-detail").textContent="Distinguished column ±"+u+"; sum of all cells = "+fmt(total)+". The corresponding main term is unchanged by translation."}
+ function costs(){let a=Number($("cost-m").value),b=Number($("cost-k").value),c=Number($("cost-n").value),v=exponents(a,b,c),max=Math.max(...v),names=["x/m","xm/k","m","k/n²"],svg=$("cost-plot"),X=z=>100+(z+5)*70;let s='<line x1="'+X(0)+'" x2="'+X(0)+'" y1="8" y2="190" stroke="#a0b2bc"/><line x1="'+X(.5)+'" x2="'+X(.5)+'" y1="8" y2="190" stroke="#f6b86e" stroke-dasharray="4 4"/>';v.forEach((z,i)=>{let y=22+44*i;s+='<text x="7" y="'+(y+15)+'" fill="#a0b2bc" font-size="15">'+names[i]+'</text><rect x="'+Math.min(X(z),X(0))+'" y="'+y+'" width="'+Math.abs(X(z)-X(0))+'" height="18" fill="#6edccc"/><text x="593" text-anchor="end" y="'+(y+15)+'" fill="#e9efed" font-size="14">'+z.toFixed(2)+'</text>'});s+='<text x="'+X(.5)+'" y="210" fill="#f6b86e" text-anchor="middle" font-size="13">½</text>';svg.innerHTML=s;$("cost-m-val").textContent=a.toFixed(2);$("cost-k-val").textContent=b.toFixed(2);$("cost-n-val").textContent=c.toFixed(2);$("cost-stat").textContent="Largest exponent "+max.toFixed(2);$("cost-detail").textContent="Exponents: "+v.map(z=>z.toFixed(2)).join(", ")+". Since max(a,1−a) ≥ ½, the first and third terms alone cannot do better than square root."}
+ $("cell-u").addEventListener("input",table);$("cell-u").addEventListener("change",table);["cost-m","cost-k","cost-n"].forEach(id=>$(id).addEventListener("input",costs));table();costs();document.documentElement.dataset.argumentReady="true";
+}

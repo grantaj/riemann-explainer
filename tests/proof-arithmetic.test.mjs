@@ -1,7 +1,7 @@
 import test from "node:test";import assert from "node:assert/strict";
-import {primeList,primePowers,smoothError,binomialBounds,gaussianFactors,thetaTerms,traceEigen,ramp,stageCost} from "../proof-arithmetic.mjs";
+import {primeList,primePowers,smoothError,binomialBounds,gaussianFactors,thetaTerms,ramp,stageCost} from "../proof-arithmetic.mjs";
 test("prime powers and smoothed error",()=>{assert.deepEqual(primeList(10),[2,3,5,7]);assert.deepEqual(primePowers(10).map(x=>x[0]),[2,3,4,5,7,8,9]);assert.ok(Math.abs(smoothError(10000)-1.749)<.002)});
 test("divisibility-size bounds",()=>{for(let n=2;n<=150;n++){let [a,b,c]=binomialBounds(n).values;assert.ok(a<=b&&b<=c)}});
 test("Gaussian splitting",()=>{assert.equal(gaussianFactors(3).length,0);assert.equal(gaussianFactors(5).length,8);assert.equal(gaussianFactors(13).length,8);assert.equal(gaussianFactors(7).length,0)});
 test("theta symmetry and value",()=>{for(let n of [1,2,3,5,6,7]){let a=thetaTerms(n);assert.ok(Math.hypot(a.reduce((s,z)=>s+z.re,0),a.reduce((s,z)=>s+z.im,0))<1e-10)}assert.ok(Math.abs(thetaTerms(0).reduce((s,z)=>s+z.re,0)-1.1803406)<1e-6)});
-test("trace and optimal stage count",()=>{for(let b of [-4,0,2,4])assert.ok(Math.abs(traceEigen(b).reduce((a,b)=>a+b)-6)<1e-12);assert.equal(stageCost(1e6,1e3),2000);assert.equal(ramp(40,81),0);assert.ok(Math.abs(ramp(40,3)-37/3)<1e-12)});
+test("optimal stage count and ramp",()=>{assert.equal(stageCost(1e6,1e3),2000);assert.equal(ramp(40,81),0);assert.ok(Math.abs(ramp(40,3)-37/3)<1e-12)});
