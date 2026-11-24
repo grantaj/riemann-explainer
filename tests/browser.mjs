@@ -138,6 +138,9 @@ try {
   for(const id of ["center-plot","center-mean","budget-plot","limit-plot"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
   await page.locator("#center-count").evaluate(el=>{el.value="4";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.match(await page.locator("#center-stat").textContent(),/−?\-?2\.5545/);
   await page.locator("#limit-eps").evaluate(el=>{el.value=".05";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.equal(await page.locator("#limit-stat").textContent(),"Choose smaller ε");
+  await page.locator("#limit-eps").evaluate(el=>{el.value=".01";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.equal(await page.locator("#limit-stat").textContent(),"Exponent strictly below β");
+  await page.locator("#budget-m").evaluate(el=>{el.value=".8";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.equal(await page.locator("#limit-stat").textContent(),"Choose smaller ε");
+  await page.locator("#budget-m").evaluate(el=>{el.value=".5";el.dispatchEvent(new Event("input",{bubbles:true}))});
   assert.equal(await page.locator("#route-plot a").count(),10);
   assert.equal(await page.locator("#route-plot").getAttribute("viewBox"),viewport.width<=600?"0 0 360 465":"0 0 600 310");
   assert.equal(await page.locator("#dependency-map .route-text a").count(),10);
