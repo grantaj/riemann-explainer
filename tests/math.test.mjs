@@ -18,7 +18,9 @@ test("all 30 tabulated zeros in the zoom range",()=>{for(const t of zeros){const
 import {primePowerWeights,primeSum,character,spotlight,costs,rootBudget,gamma} from "../proof.mjs";
 test("Phase 2 weights and ramp values",()=>{
  const w=primePowerWeights(150);
- for(let n=1;n<=150;n++)near(w[n],d.a[n]);
+ // The sieve a[n] is a primality indicator; ψ increments are Λ(n).
+ for(let n=1;n<=150;n++)near(w[n],d.psi[n]-d.psi[n-1]);
+ near(w[4],Math.log(2));near(w[9],Math.log(3));near(w[6],0);
  const at6=2*Math.log(2)+Math.log(3)+.5*Math.log(2)+.2*Math.log(5);
  near(primeSum(6,w),at6);
  near(primeSum(6,w,"center"),at6-6*Math.log(6)+(1+gamma)*6);
