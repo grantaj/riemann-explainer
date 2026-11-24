@@ -8,8 +8,9 @@ try {
   await page.goto("http://127.0.0.1:8000/");
   await page.waitForSelector("html[data-ready=true]");
   assert.equal(await page.locator("#prime-grid circle").count(),300);
-  for(const [id,v,output] of [["prime-start","800","#prime-stat"],["count-max","3","#count-stat"],["euler-s","3","#euler-stat"],["vec-t","5","#vector-detail"],["music-n","30","#music-stat"],["rh-beta",".8","#rh-detail"]]){
+  for(const [id,v,output] of [["prime-start","800","#prime-stat"],["count-max","3","#count-stat"],["euler-s","3","#euler-stat"],["vec-t","8","#vector-detail"],["music-n","30","#music-stat"],["rh-beta",".8","#rh-detail"]]){
    const before=await page.locator(output).textContent();
+   assert.notEqual(Number(await page.locator("#"+id).inputValue()),Number(v),id+": test must change the input");
    await page.locator("#"+id).evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event("input",{bubbles:true}))},v);
    assert.notEqual(await page.locator(output).textContent(),before,id);
   }
