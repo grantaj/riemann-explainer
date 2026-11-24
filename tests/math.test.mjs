@@ -14,3 +14,33 @@ test("explicit formula pair term",()=>{const x=100,b=.5,t=14.1;near(contribution
 test("first 30 zero pairs improve RMS approximation on the test interval",()=>{let e0=0,e30=0;for(let x=2.5;x<100;x+=.25){const v=psiMid(d,x);e0+=(v-explicit(x,0))**2;e30+=(v-explicit(x,30))**2}assert.ok(e30<e0)});
 
 test("all 30 tabulated zeros in the zoom range",()=>{for(const t of zeros){const v=zeta([.5,t]);assert.ok(Math.hypot(...v)<1e-8,"zero at "+t);const w=zeta([.5,-t]);assert.ok(Math.hypot(...w)<1e-8,"conjugate at "+t)}});
+
+import {primePowerWeights,primeSum,character,spotlight,costs,rootBudget,gamma} from "../proof.mjs";
+test("Phase 2 weights and ramp values",()=>{
+ const w=primePowerWeights(150);
+ for(let n=1;n<=150;n++)near(w[n],d.a[n]);
+ const at6=2*Math.log(2)+Math.log(3)+.5*Math.log(2)+.2*Math.log(5);
+ near(primeSum(6,w),at6);
+ near(primeSum(6,w,"center"),at6-6*Math.log(6)+(1+gamma)*6);
+ near(primeSum(6,w,"steps"),Math.log(2*3*2*5));
+ near(primeSum(5-1e-9,w),primeSum(5,w),1e-8);
+});
+test("Phase 2 characters are multiplicative and orthogonal",()=>{
+ for(let k=0;k<4;k++)for(let a=0;a<5;a++)for(let b=0;b<5;b++){
+  const [x,y]=character(k,a),[u,v]=character(k,b);
+  const [re,im]=character(k,a*b);
+  near(re,x*u-y*v);near(im,x*v+y*u);
+ }
+ for(let a=0;a<5;a++){
+  const [re,im]=character(4,a);
+  near(re,[0,1,2,3].reduce((s,k)=>s+character(k,a)[0],0)/4);
+  near(im,[0,1,2,3].reduce((s,k)=>s+character(k,a)[1],0)/4);
+ }
+});
+test("Phase 2 spotlight, balancing and degree budgets",()=>{
+ near(spotlight(20,1),1);assert.equal(spotlight(20,0),0);
+ assert.ok(spotlight(100,1.2)<spotlight(10,1.2));
+ assert.deepEqual(costs(.5),[.5,.5,.5]);
+ for(let i=0;i<=100;i++)assert.ok(costs(i/100)[2]>=.5);
+ assert.equal(rootBudget(30,7),4);
+});
