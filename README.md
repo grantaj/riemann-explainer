@@ -1,2 +1,2 @@
 # riemann-explainer
-An interactive explainer for the Riemann hupothesis
+An interactive explainer for the Riemann hypothesis
