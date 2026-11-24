@@ -11,6 +11,9 @@ const app=read("app.mjs").replace('./math.mjs','./'+mathName),appName=name("app"
 const css=read("style.css"),cssName=name("style","css",css);
 const index=read("index.html").replace('./app.mjs','./'+appName).replace('./style.css','./'+cssName);
 if(!index.includes(appName)||!index.includes(cssName)||!app.includes(mathName))throw Error("Asset references not rewritten");
+const proof=read("proof.mjs"),proofName=name("proof","mjs",proof);
+const proofPage=read("proof.html").replace("./proof.mjs","./"+proofName).replace("./style.css","./"+cssName);
+if(!proofPage.includes(proofName)||!proofPage.includes(cssName))throw Error("Proof asset references not rewritten");
 rmSync(dir,{recursive:true,force:true});mkdirSync(dir,{recursive:true});
-for(const [file,content] of [["index.html",index],[mathName,math],[appName,app],[cssName,css],[".nojekyll",""]])writeFileSync(join(dir,file),content);
+for(const [file,content] of [["index.html",index],["proof.html",proofPage],[proofName,proof],[mathName,math],[appName,app],[cssName,css],[".nojekyll",""]])writeFileSync(join(dir,file),content);
 console.log("Release:",appName,mathName,cssName);
