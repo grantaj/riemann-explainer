@@ -7,6 +7,9 @@ try {
   const errors=[];page.on("pageerror",e=>errors.push(e.message));
   await page.goto("http://127.0.0.1:8000/");
   await page.waitForSelector("html[data-ready=true]");
+  await page.waitForSelector("html[data-journey-ready=true]");
+  await page.waitForSelector("html[data-concepts-ready=true]");
+  for(const id of ["continue-plot","weight-plot"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
   assert.equal(await page.locator("#prime-grid circle").count(),300);
   // Check every chart has drawn content on initial load, not just the first few.
   for(const id of ["hero-art","prime-grid","gaps","count-plot","density-plot","euler-plot","factor-grid","vector-input","vector","domain","fourier-plot","single-wave","music-plot","rh-plane","rh-growth"]){
@@ -117,6 +120,10 @@ try {
   assert.deepEqual(errors,[]);
   await page.goto("http://127.0.0.1:8000/proof.html");
   await page.waitForSelector("html[data-arithmetic-ready=true]");
+  await page.waitForSelector("html[data-journey-ready=true]");
+  for(const id of ["floor-plot","lem-curve","lem-val","lem-size"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
+  const oldLem=await page.locator("#lem-integer").textContent();await page.locator("#lem-n").evaluate(el=>{el.value="49";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.notEqual(await page.locator("#lem-integer").textContent(),oldLem);
+  await page.locator('a[data-concept="lemniscate"]').first().click();assert.ok(await page.locator("#concept-dialog").isVisible());await page.keyboard.press("Escape");
   for(const id of ["bin-chart","field-chart","theta-chart","gain-chart"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
   for(const [id,v,out] of [["bin-n","70","bin-stat"],["theta-n","8","theta-stat"],["gain-x","70","gain-detail"]]){const before=await page.locator("#"+out).textContent();await page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},v);assert.notEqual(await page.locator("#"+out).textContent(),before,id);}
   await page.locator("#field-prime").selectOption("7");assert.equal(await page.locator("#field-stat").textContent(),"Inert");
@@ -125,6 +132,10 @@ try {
   await page.locator('#continue a[href="./argument.html"]').click();
   await page.waitForSelector("html[data-argument-ready=true]");
   await page.waitForSelector("html[data-labs-ready=true]");
+  await page.waitForSelector("html[data-journey-ready=true]");
+  for(const id of ["center-plot","center-mean","budget-plot","limit-plot"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
+  await page.locator("#center-count").evaluate(el=>{el.value="4";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.match(await page.locator("#center-stat").textContent(),/−?\-?2\.5545/);
+  await page.locator("#limit-eps").evaluate(el=>{el.value=".05";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.equal(await page.locator("#limit-stat").textContent(),"Choose smaller ε");
   assert.equal(await page.locator("#route-plot a").count(),10);
   assert.equal(await page.locator("#route-plot").getAttribute("viewBox"),viewport.width<=600?"0 0 360 465":"0 0 600 310");
   assert.equal(await page.locator("#dependency-map .route-text a").count(),10);
@@ -147,6 +158,7 @@ try {
   await page.locator("#behrend-all").uncheck();assert.match(await page.locator("#behrend-stat").textContent(),/0 progressions/);
   await page.locator("#window details.depth > summary").click();
   assert.ok(await page.locator("#window details.depth").evaluate(el=>el.open));
+  await page.locator("#window details.depth > div > details.derivation > summary").click();
   await page.locator("#window details.source > summary").click();
   assert.ok(await page.locator("#window details.source a").first().isVisible());
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Part III overflow");

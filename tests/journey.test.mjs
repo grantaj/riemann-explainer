@@ -1,0 +1,9 @@
+import test from "node:test";import assert from "node:assert/strict";
+import {mainTerm,lemNumbers,valuationBig,logBig,lemBudget,factorialBudget,arc,geo,weightsUpTo,centered,budgetPowers,limitExponents} from "../journey.mjs";
+const near=(a,b,t=1e-8)=>assert.ok(Math.abs(a-b)<t,a+" != "+b);
+test("lemniscate derivatives are exact",()=>{const a=lemNumbers();assert.equal(a[1],1n);assert.equal(a[5],-12n);assert.equal(a[9],3024n);assert.equal(a[13],-4390848n);assert.equal(a[17],21224560896n);for(let i=0;i<a.length;i++)if(i%4!==1)assert.equal(a[i],0n);assert.equal(valuationBig(a[101],3),37);assert.equal(valuationBig(a[101],7),14);assert.equal(valuationBig(a[101],11),9);for(let n=1;n<=201;n+=4){const v=lemBudget(n,a[n]);for(let q of v.data)if(q.inert)assert.ok(q.v>=Math.floor(q.pred));assert.ok(v.guaranteed<=v.actual+1e-7&&v.actual<=v.log+1e-7)}});
+test("factorial identity and rounding",()=>{for(let n of [20,100,300,2000]){let v=factorialBudget(n);near(v.exact,v.size,1e-7);assert.ok(v.loss>0&&v.loss<=v.psi)}});
+test("lemniscate arc endpoint",()=>{near(arc(0),0);near(arc(1),1.311028777,1e-6)});
+test("geometric series and weighted prime powers",()=>{near(geo(.5,20),2*(1-.5**20));assert.equal(geo(2,4),15);let v=weightsUpTo(10);assert.equal(v.length,7);assert.equal(v.filter(q=>q.prime).length,4)});
+test("published independent centering",()=>{near(mainTerm(),84463.3942,.0001);let v=centered([84701.03168516245,84163.13718206601,84286.6628241889,84692.52717197109],4);near(v.mean,-2.5545,.0001);assert.ok(v.v[0]>0&&v.v[1]<0)});
+test("normalized errors and choice of exponent",()=>{let v=budgetPowers(8,.5);assert.deepEqual(v,[0,-28,0,0]);assert.ok(limitExponents(.72,.01).excluded);assert.ok(!limitExponents(.55,.01).excluded)});
