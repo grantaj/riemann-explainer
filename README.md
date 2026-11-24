@@ -1,2 +1,39 @@
-# riemann-explainer
-An interactive explainer for the Riemann hupothesis
+# Riemann — the hidden order of primes
+
+An interactive journey from prime numbers to the Riemann hypothesis, with a planned source-linked proof explorer. The site is static HTML, CSS and ES modules; all numerical visualisations run locally.
+
+## Run locally
+
+```sh
+python3 -m http.server 8000
+```
+
+Visit http://localhost:8000/ (ES modules require HTTP rather than file://).
+
+## Development roadmap
+
+- [Phase 1: interactive foundations](https://github.com/grantaj/riemann-explainer/issues/1)
+- [Phase 2: bridge to the proof](https://github.com/grantaj/riemann-explainer/issues/2)
+- [Phase 3: proof explorer](https://github.com/grantaj/riemann-explainer/issues/3)
+
+## Files
+
+- `index.html`: six chapters, accessible controls, links to sources
+- `style.css`: responsive dark visual system
+- `math.mjs`: pure numerical kernels and first 30 positive zero ordinates (standard values, see [LMFDB](https://www.lmfdb.org/zeros/zeta/))
+- `app.mjs`: SVG plots and canvas domain colouring
+- `tests/`: numerical regression tests and desktop/mobile Chromium smoke tests
+
+Run numerical tests with `node --test tests/math.test.mjs`. To run the browser smoke test, install Playwright (`npm install --no-save --package-lock=false playwright@1.56.1` and `npx playwright install chromium`), start the HTTP server, then run `node tests/browser.mjs`.
+
+The domain colouring uses Euler–Maclaurin summation with N=40 and eight corrections, over the displayed domains only. The pole is handled separately; the arithmetic uses double precision, not certified intervals. The explicit formula uses finite conjugate-pair sums and the exact prime-power staircase. At jumps the infinite explicit formula converges to the midpoint. The hypothetical off-line experiment compares single-pair envelopes, not a proof or a numerical model of all zeros.
+
+## GitHub Pages
+
+In repository Settings → Pages, choose **GitHub Actions** as the source. The Test and publish workflow runs mathematical and browser checks on PRs and deploys only after the checks pass on main. Expected project URL: https://grantaj.github.io/riemann-explainer/
+
+This is currently a private repository. GitHub Pages availability for private repositories depends on account plan; public site publication requires appropriate repository and Pages settings. Do not change repository visibility without the owner's decision.
+
+## Sources
+
+The site links NIST DLMF §§25.2, 25.4, 25.10, 25.16, John Baez's explicit formula exposition, and LMFDB. Proof announcements and their verification status will be treated in Phase 2, with dated primary-source references.
