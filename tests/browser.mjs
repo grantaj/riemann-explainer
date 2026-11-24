@@ -115,6 +115,13 @@ try {
   assert.ok(await page.locator("#windows details.derivation").evaluate(el=>el.open));
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Part II horizontal overflow");
   assert.deepEqual(errors,[]);
+  await page.goto("http://127.0.0.1:8000/proof.html");
+  await page.waitForSelector("html[data-arithmetic-ready=true]");
+  for(const id of ["bin-chart","field-chart","theta-chart","gain-chart","trace-chart"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
+  for(const [id,v,out] of [["bin-n","70","bin-stat"],["theta-n","8","theta-stat"],["gain-x","70","gain-detail"],["trace-b","3","trace-detail"]]){const before=await page.locator("#"+out).textContent();await page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},v);assert.notEqual(await page.locator("#"+out).textContent(),before,id);}
+  await page.locator("#field-prime").selectOption("7");assert.equal(await page.locator("#field-stat").textContent(),"Inert");
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Phase II arithmetic horizontal overflow");
+  assert.deepEqual(errors,[]);
   await page.close();
  }
  console.log("Desktop and mobile interaction smoke tests passed");
