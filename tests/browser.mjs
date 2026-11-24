@@ -10,6 +10,8 @@ try {
   await page.waitForSelector("html[data-journey-ready=true]");
   await page.waitForSelector("html[data-concepts-ready=true]");
   for(const id of ["continue-plot","weight-plot"])assert.ok(await page.locator("#"+id+" > *").count()>0,id);
+  await page.locator("#continue-u").evaluate(el=>{el.value="2";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.match(await page.locator("#continue-detail").textContent(),/rational formula = −?\-?1/);
+  await page.locator("#weight-x").evaluate(el=>{el.value="20";el.dispatchEvent(new Event("input",{bubbles:true}))});assert.match(await page.locator("#weight-detail").textContent(),/π\(20\) = 8/);
   assert.equal(await page.locator("#prime-grid circle").count(),300);
   // Check every chart has drawn content on initial load, not just the first few.
   for(const id of ["hero-art","prime-grid","gaps","count-plot","density-plot","euler-plot","factor-grid","vector-input","vector","domain","fourier-plot","single-wave","music-plot","rh-plane","rh-growth"]){
