@@ -1,4 +1,4 @@
-import {primeData,li,series,product,pow,zeta,zeros,explicit} from "./math.mjs";
+import {primeData,li,series,product,pow,zeta,zeros,explicit,contribution} from "./math.mjs";
 (function main(){
  const $=id=>document.getElementById(id), val=id=>Number($(id).value), out=(id,v)=>{$(id).textContent=v}, A="#6edccc",B="#f6b86e",C="#b7a5fb",M="#a0b2bc",L="#34434c";
  const d=primeData(10000), fmt=x=>x.toLocaleString("en",{maximumFractionDigits:2}), dec=(x,n=3)=>Number.isFinite(x)?x.toFixed(n):"∞";
@@ -117,5 +117,38 @@ import {primeData,li,series,product,pow,zeta,zeros,explicit} from "./math.mjs";
  const envelope=(s,l)=>Math.log10(2/Math.hypot(s,t))+s*l;plot("rh-growth",[{data:sample(0,12,120,l=>envelope(.5,l)),color:A},{data:sample(0,12,120,l=>envelope(b,l)),color:B}],{xmin:0,xmax:12,xlabel:"x (log scale)",ylabel:"Amplitude (log scale)",xtick:l=>"10^"+fmt(l),ytick:l=>"10^"+fmt(l)});
  const ratio=10**(12*(b-.5))*Math.hypot(.5,t)/Math.hypot(b,t);out("rh-detail","At x = 10¹², the selected pair has an envelope "+fmt(ratio)+" times the on-line envelope. This compares amplitudes, not instantaneous values or a bound for the full zero sum.");
  });
+
+ bind(["density-x"],()=>{
+  const n=val("density-x"),density=x=>1/Math.log(x),area=li(n)-li(2),curve=sample(2,500,400,density);
+  const id="density-plot",svg=$(id);
+  plot(id,[{data:curve,color:C}],{xmin:2,xmax:500,ymin:0,ymax:1.5,xlabel:"Number",ylabel:"Estimated density",xtick:x=>fmt(Math.round(x))});
+  const X=x=>56+(x-2)/498*528,Y=y=>200-y/1.5*178;
+  const top=sample(2,n,300,density).map(([x,y])=>[X(x),Y(y)]);
+  const coords=[[X(2),Y(0)],...top,[X(n),Y(0)]].map(p=>p.join(",")).join(" ");
+  svg.insertAdjacentHTML("afterbegin",el("polygon",{points:coords,fill:A,"fill-opacity":.22}));
+  svg.insertAdjacentHTML("beforeend",line(X(n),Y(0),X(n),Y(density(n)),A,{"stroke-width":2}));
+  out("density-x-val",fmt(n));out("density-detail","Shaded area ≈ "+fmt(area)+". Add li(2) ≈ "+dec(li(2),3)+" to obtain li("+fmt(n)+") ≈ "+fmt(li(n))+". The area is a heuristic count, not a tally of individual primes.");
+ });
+ bind(["factor-a","factor-b"],()=>{
+  const a=val("factor-a"),b=val("factor-b"),n=2**a*3**b;
+  let z=txt(320,18,"Power of 2 (a)",{"text-anchor":"middle","font-size":13})+txt(10,50,"b",{"font-size":14});
+  for(let j=0;j<=5;j++)z+=txt(104+j*87,40,String(j),{"text-anchor":"middle","font-size":13});
+  for(let k=0;k<=4;k++){z+=txt(37,68+k*39,String(k),{"text-anchor":"middle","font-size":13});for(let j=0;j<=5;j++){const selected=a===j&&b===k,x=65+j*87,y=48+k*39;z+=el("rect",{x,y,width:78,height:31,rx:4,fill:selected?"#204d48":"#0d1218",stroke:selected?A:L,"data-factor":j+","+k,"data-active":selected?"true":"false"})+txt(x+39,y+21,String(2**j*3**k),{"text-anchor":"middle","font-size":15,fill:selected?"#e9efed":M,"pointer-events":"none"})}}
+  z+=txt(12,252,"b = power of 3",{"font-size":12});
+  $("factor-grid").innerHTML=z;out("factor-a-val",a);out("factor-b-val",b);out("factor-detail","2^"+a+" × 3^"+b+" = "+fmt(n)+". At s = 2: 1/"+fmt(2**(2*a))+" × 1/"+fmt(3**(2*b))+" = 1/"+fmt(n*n)+".");
+ });
+ $("factor-grid").addEventListener("click",e=>{const cell=e.target.closest("[data-factor]");if(!cell)return;const [a,b]=cell.dataset.factor.split(",");$("factor-a").value=a;$("factor-b").value=b;$("factor-a").dispatchEvent(new Event("input"))});
+ bind(["fourier-n"],()=>{
+  const n=val("fourier-n"),end=4*Math.PI,wave=x=>{let q=0;for(let j=0;j<n;j++){const k=2*j+1;q+=Math.sin(k*x)/k}return q*4/Math.PI};
+  const square=[[0,1],[Math.PI,1],[Math.PI,-1],[2*Math.PI,-1],[2*Math.PI,1],[3*Math.PI,1],[3*Math.PI,-1],[end,-1]];
+  plot("fourier-plot",[{data:square,color:M,width:1.3},{data:sample(0,end,1000,wave),color:A,width:2}],{xmin:0,xmax:end,ymin:-1.35,ymax:1.35,xlabel:"Position",ylabel:"Height",xtick:x=>Math.round(x/Math.PI)===0?"0":Math.round(x/Math.PI)+"π"});out("fourier-n-val",n);
+ });
+ function single(){
+  const j=val("single-zero"),t=zeros[j],envelope=x=>2*Math.sqrt(x)/Math.hypot(.5,t);
+  plot("single-wave",[{data:sample(2,100,400,envelope),color:L,width:1},{data:sample(2,100,400,x=>-envelope(x)),color:L,width:1},{data:sample(2,100,800,x=>contribution(x,.5,t)),color:A,width:2}],{xmin:2,xmax:100,xlabel:"x",ylabel:"Contribution to ψ(x)"});
+  out("single-detail","γ = "+dec(t,6)+". The wave changes sign repeatedly. The grey envelopes are ±2√x/√(¼+γ²). Higher zeros oscillate faster in log x; all these known zeros have the same square-root growth exponent.");
+ }
+ $("single-zero").addEventListener("change",single);single();
+
  document.documentElement.dataset.ready="true";
 })();
