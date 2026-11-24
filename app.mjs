@@ -38,11 +38,20 @@ import {primeData,li,series,product,pow,zeta,zeros,explicit,contribution} from "
 
  bind(["vec-s","vec-t"],()=>{
   const s=val("vec-s"),t=val("vec-t"),points=[[0,0]],n=24;
+  // Cartesian coordinates of the INPUT, on fixed independently labelled scales.
+  const ix=s=>42+s/3.25*235,iy=t=>254-t/30*230;
+  let input=line(ix(0),iy(0),ix(3.25),iy(0),M)+line(ix(0),iy(0),ix(0),iy(30),M);
+  for(const q of [0,1,2,3])input+=line(ix(q),iy(0),ix(q),iy(30),L)+txt(ix(q),274,String(q),{"text-anchor":"middle","font-size":12});
+  for(const q of [0,5,10,15,20,25,30])input+=line(ix(0),iy(q),ix(3.25),iy(q),L)+txt(34,iy(q)+4,String(q),{"text-anchor":"end","font-size":12});
+  input+=line(ix(s),iy(0),ix(s),iy(t),A,{"stroke-dasharray":"3 4"})+line(ix(0),iy(t),ix(s),iy(t),A,{"stroke-dasharray":"3 4"});
+  input+=circle(ix(s),iy(t),5,A,{"data-input-point":"true"})+txt(ix(s)-9,Math.max(14,iy(t)-10),"s",{"text-anchor":"end",fill:A,"font-size":15})+txt(279,294,"Re(s)",{"text-anchor":"end","font-size":12})+txt(42,13,"Im(s)",{"font-size":12});
+  $("vector-input").innerHTML=input;out("vector-input-detail","s = "+dec(s,2)+" + "+dec(t,2)+"i. Axes use different scales.");
+
   for(let k=1;k<=n;k++){const v=pow(k,[-s,-t]),p=points.at(-1);points.push([p[0]+v[0],p[1]+v[1]])}
   const full=zeta([s,t]),last=points.at(-1),all=[...points,full];
   const left=Math.min(...all.map(p=>p[0])),right=Math.max(...all.map(p=>p[0])),lo=Math.min(...all.map(p=>p[1])),hi=Math.max(...all.map(p=>p[1]));
   const scale=Math.min(500/Math.max(right-left,.3),208/Math.max(hi-lo,.45)),X=x=>300+(x-(left+right)/2)*scale,Y=y=>140-(y-(lo+hi)/2)*scale;
-  let z=line(25,Y(0),575,Y(0),L)+line(X(0),18,X(0),258,L)+txt(575,Y(0)-6,"Re",{"text-anchor":"end"})+txt(X(0)+5,16,"Im")+circle(X(0),Y(0),3,M)+txt(X(0)-5,Y(0)+16,"0",{"text-anchor":"end"});
+  let z=line(25,Y(0),575,Y(0),L)+line(X(0),18,X(0),258,L)+txt(575,Y(0)-6,"Re(output)",{"text-anchor":"end"})+txt(X(0)+5,16,"Im(output)")+circle(X(0),Y(0),3,M)+txt(X(0)-5,Y(0)+16,"0",{"text-anchor":"end"});
   z+=line(X(0),Y(0),X(last[0]),Y(last[1]),B,{"stroke-width":2,"stroke-dasharray":"5 4"});
   for(let k=1;k<=n;k++){const [x0,y0]=points[k-1],[x1,y1]=points[k];z+=line(X(x0),Y(y0),X(x1),Y(y1),A,{"stroke-width":k<5?2:1.6,"stroke-opacity":k<6?1:.65})+circle(X(x1),Y(y1),k<5?3:1.6,A);if(k<=3&&Math.hypot(x1-x0,y1-y0)*scale>24)z+=txt((X(x0)+X(x1))/2,(Y(y0)+Y(y1))/2-7,"n="+k,{"text-anchor":"middle"})}
   z+=line(X(last[0]),Y(last[1]),X(full[0]),Y(full[1]),C,{"stroke-dasharray":"2 4"})+circle(X(last[0]),Y(last[1]),4.5,B,{stroke:"#11161c","stroke-width":1})+circle(X(full[0]),Y(full[1]),4.5,C,{stroke:"#11161c","stroke-width":1});
