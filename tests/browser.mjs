@@ -44,6 +44,27 @@ try {
   await page.locator("#concept-close").click();
   assert.ok(!(await page.locator("#concept-dialog").isVisible()));
   assert.ok(!(await page.locator("#gaps").textContent()).includes("Successive prime pairs"));
+  assert.equal(await page.locator("details.depth").count(),7);
+  assert.equal(await page.locator("details.derivation").count(),7);
+  assert.equal(await page.locator("details.depth[open]").count(),0);
+  await page.locator("#counting details.depth > summary").click();
+  assert.ok(await page.locator("#density-plot").isVisible());
+  const densityBefore=await page.locator("#density-detail").textContent();
+  await page.locator("#density-x").evaluate(el=>{el.value="250";el.dispatchEvent(new Event("input",{bubbles:true}))});
+  assert.notEqual(await page.locator("#density-detail").textContent(),densityBefore);
+  await page.locator("#counting details.derivation > summary").click();
+  assert.ok(await page.locator("#counting details.derivation").evaluate(el=>el.open));
+  await page.locator("#euler details.depth > summary").click();
+  assert.equal(await page.locator("#factor-grid [data-factor]").count(),30);
+  await page.locator('#factor-grid [data-factor="1,2"]').click();
+  assert.match(await page.locator("#factor-detail").textContent(),/= 18\./);
+  const waveBefore=await page.locator("#fourier-plot path").last().getAttribute("d");
+  await page.locator("#fourier-n").evaluate(el=>{el.value="12";el.dispatchEvent(new Event("input",{bubbles:true}))});
+  assert.notEqual(await page.locator("#fourier-plot path").last().getAttribute("d"),waveBefore);
+  await page.locator("#single-zero").selectOption("1");
+  assert.match(await page.locator("#single-detail").textContent(),/21\.022040/);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"horizontal overflow with nested sections open");
+
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"horizontal overflow");
   assert.deepEqual(errors,[]);
   await page.close();
