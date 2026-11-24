@@ -8,6 +8,19 @@ try {
   await page.goto("http://127.0.0.1:8000/");
   await page.waitForSelector("html[data-ready=true]");
   assert.equal(await page.locator("#prime-grid circle").count(),300);
+  // Check every chart has drawn content on initial load, not just the first few.
+  for(const id of ["hero-art","prime-grid","gaps","count-plot","density-plot","euler-plot","factor-grid","vector-input","vector","domain","fourier-plot","single-wave","music-plot","rh-plane","rh-growth"]){
+   assert.ok(await page.locator("#"+id+" > *").count()>0,id+" did not render");
+  }
+  const point=page.locator("#vector-input [data-input-point]");
+  const x0=await point.getAttribute("cx"),y0=await point.getAttribute("cy");
+  await page.locator("#vec-t").evaluate(el=>{el.value="12";el.dispatchEvent(new Event("input",{bubbles:true}))});
+  assert.equal(await point.getAttribute("cx"),x0,"imaginary input must not move horizontally");
+  assert.ok(Number(await point.getAttribute("cy"))<Number(y0),"larger imaginary input moves upwards");
+  const y1=await point.getAttribute("cy");
+  await page.locator("#vec-s").evaluate(el=>{el.value="2";el.dispatchEvent(new Event("input",{bubbles:true}))});
+  assert.equal(await point.getAttribute("cy"),y1,"real input must not move vertically");
+  assert.ok(Number(await point.getAttribute("cx"))>Number(x0),"larger real input moves right");
   for(const [id,v,output] of [["prime-start","800","#prime-stat"],["count-max","3","#count-stat"],["euler-s","3","#euler-stat"],["vec-t","8","#vector-detail"],["music-n","30","#music-stat"],["rh-beta",".8","#rh-detail"]]){
    const before=await page.locator(output).textContent();
    assert.notEqual(Number(await page.locator("#"+id).inputValue()),Number(v),id+": test must change the input");
@@ -25,15 +38,30 @@ try {
   assert.equal(await page.locator("#domain image").count(),1);
   assert.equal(await page.locator("#domain [data-zero]").count(),6);
   await page.locator("#domain-colors").uncheck();
-  await page.locator("#domain-mode").selectOption("real");
+  const scale=async(id,value)=>page.locator("#"+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))},value);
+  await scale("domain-im-scale","110");
+  assert.equal(await page.locator("#domain [data-zero]").count(),30);
+  assert.equal(await page.locator("#domain").getAttribute("data-re-min"),"-0.5");
+  await scale("domain-re-scale","5");
+  assert.equal(await page.locator("#domain").getAttribute("data-im-max"),"110");
+  assert.equal(await page.locator("#domain [data-zero]").count(),32);
+  await page.locator("#domain-negative").check();
+  assert.equal(await page.locator("#domain [data-zero]").count(),62);
+  await scale("domain-im-scale","4");
   assert.equal(await page.locator("#domain [data-zero]").count(),2);
   assert.equal(await page.locator("#domain [data-pole]").count(),1);
+  assert.match(await page.locator("#domain").getAttribute("data-selection"),/^trivial-/);
+  // Choose a particular zero before testing keyboard navigation and snapping.
+  await page.locator('#domain [data-zero="trivial-2"]').click();
   assert.equal(await page.locator("#domain").getAttribute("data-selection"),"trivial-2");
   await page.locator("#domain").focus();
   await page.keyboard.press("ArrowRight");
   assert.equal(await page.locator("#domain").getAttribute("data-selection"),"point");
   await page.keyboard.press("Enter");
   assert.equal(await page.locator("#domain").getAttribute("data-selection"),"trivial-2");
+  await page.locator("#domain-reset").click();
+  assert.equal(await page.locator("#domain [data-zero]").count(),6);
+  assert.equal(await page.locator("#domain").getAttribute("data-im-min"),"0");
   assert.equal(await page.locator('#domain-s, #domain-t').count(),0);
   await page.locator('a[data-concept="pnt"]').first().click();
   assert.ok(await page.locator("#concept-dialog").isVisible());
