@@ -17,8 +17,8 @@ export function div(a,b){const d=b[0]*b[0]+b[1]*b[1];return [(a[0]*b[0]+a[1]*b[1
 
 export function pow(x,s){const l=Math.log(x),r=Math.exp(s[0]*l),t=s[1]*l;return [r*Math.cos(t),r*Math.sin(t)]}
 
-export function zeta(s){ // Euler-Maclaurin, N=40 and eight Bernoulli corrections; intended for -4<=Re<=3, |Im|<=40
- const n=40;let q=[0,0];for(let k=1;k<n;k++)q=add(q,pow(k,[-s[0],-s[1]]));
+export function zeta(s){ // Euler-Maclaurin, N=40 and eight Bernoulli corrections; intended for -4.5<=Re<=5.5, |Im|<=110; approximate, not certified
+ const n=Math.max(40,Math.ceil(Math.abs(s[1])*.55));let q=[0,0];for(let k=1;k<n;k++)q=add(q,pow(k,[-s[0],-s[1]]));
  q=add(q,div(pow(n,[1-s[0],-s[1]]),[s[0]-1,s[1]]));q=add(q,mul([.5,0],pow(n,[-s[0],-s[1]])));
  const b=[1/12,-1/720,1/30240,-1/1209600,1/47900160,-691/1307674368000,1/74724249600,-3617/10670622842880000];let rising=[1,0],j=0;
  for(let k=1;k<=b.length;k++){while(j<2*k-1){rising=mul(rising,[s[0]+j,s[1]]);j++}q=add(q,mul([b[k-1],0],mul(rising,pow(n,[1-s[0]-2*k,-s[1]]))))}return q}
