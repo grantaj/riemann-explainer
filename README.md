@@ -37,3 +37,4 @@ This is currently a private repository. GitHub Pages availability for private re
 ## Sources
 
 The site links NIST DLMF §§25.2, 25.4, 25.10, 25.16, John Baez's explicit formula exposition, and LMFDB. Proof announcements and their verification status will be treated in Phase 2, with dated primary-source references.
+
